@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#f3f6f4">
     <title>AegisRoute AI | Hospital Operations</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='27') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='28') }}">
 </head>
 <body>
     <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -106,15 +106,15 @@
         <section class="bottom-grid">
             <article class="panel" id="ambulances">
                 <div class="panel-heading"><div><p class="eyebrow">HOSPITAL RECEIVING DESK</p><h2>Incoming ambulance requests</h2></div><span class="panel-count" id="request-count">0 pending</span></div>
-                <p class="form-intro">Requests sent by ambulance drivers appear here automatically. Review each request and accept it as Received or Decline it.</p>
+                <p class="form-intro">Fictional demo requests are shown below. New requests sent to the ambulance intake API appear here automatically. Accept each as Received or Decline it.</p>
                 <div class="request-list" id="request-list" aria-live="polite"></div>
-                <p class="demo-note">Demo queue only. This dashboard is not connected to a real hospital dispatch network. Do not enter real patient information.</p>
+                <p class="demo-note">All preloaded requests are fictional examples for demonstration. This dashboard is not connected to a real dispatch network. Do not enter real patient information.</p>
             </article>
             <article class="panel alert-panel" id="alerts">
                 <div class="panel-heading"><div><p class="eyebrow">RECEIVED SOS ALERTS</p><h2>Urgent driver alerts</h2></div><span class="panel-count sos-count" id="sos-count">0 active</span></div>
-                <p class="form-intro">SOS alerts sent by ambulance drivers are highlighted here. Hospital staff can mark the alert Received or Declined.</p>
+                <p class="form-intro">A fictional SOS example is included to demonstrate receiving urgent driver alerts. Hospital staff can mark it Received or Declined.</p>
                 <div class="request-list" id="sos-list" aria-live="assertive"></div>
-                <p class="demo-note">SOS is received only when an ambulance system submits it to the request API. This demo does not contact emergency services.</p>
+                <p class="demo-note">Preloaded SOS is fictional. New SOS alerts appear when an ambulance system submits them to the intake API. This demo does not contact emergency services.</p>
             </article>
         </section>
 

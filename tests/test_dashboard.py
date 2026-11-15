@@ -61,6 +61,18 @@ class DashboardApiTests(unittest.TestCase):
         self.assertNotIn("sendAmbulanceRequest", script)
         self.assertNotIn("#sos-button", script)
 
+    def test_hospital_queue_has_fictional_pending_requests_and_sos_example(self):
+        requests = app.app.test_client().get("/api/v1/ambulance-requests").get_json()["requests"]
+        demo_requests = {item["id"]: item for item in requests}
+
+        self.assertIn("DEMO-REQ-201", demo_requests)
+        self.assertIn("DEMO-REQ-202", demo_requests)
+        self.assertIn("DEMO-REQ-203", demo_requests)
+        self.assertEqual(demo_requests["DEMO-REQ-201"]["status"], "Pending")
+        self.assertEqual(demo_requests["DEMO-REQ-202"]["status"], "Pending")
+        self.assertEqual(demo_requests["DEMO-REQ-203"]["status"], "Pending")
+        self.assertTrue(demo_requests["DEMO-REQ-203"]["sos"])
+
     def test_driver_request_is_shared_and_hospital_can_mark_received(self):
         driver = app.app.test_client()
         hospital = app.app.test_client()

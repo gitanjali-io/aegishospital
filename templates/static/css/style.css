@@ -126,7 +126,7 @@ h1 { margin: 7px 0 5px; color: var(--navy); font-size: clamp(24px, 2.4vw, 31px);
 .request-list { display: grid; gap: 9px; }
 .queue-empty { margin: 0; padding: 18px 12px; border: 1px dashed #d3dfd9; border-radius: 7px; color: #5b6d72; background: #f8fbf9; font-size: 11px; text-align: center; }
 .sos-count { color: #922b2b; border-color: #e8caca; background: #fff4f3; }
-.request-card { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px; border: 1px solid #dbe5e1; border-radius: 7px; background: #f8fbf9; }
+.request-card { display: flex; align-items: flex-start; flex-direction: column; gap: 10px; padding: 11px; border: 1px solid #dbe5e1; border-radius: 7px; background: #f8fbf9; }
 .request-sos { border-color: #e4b7b7; background: #fff7f6; }
 .request-details { display: grid; min-width: 0; gap: 4px; }
 .request-details strong { color: #2b434b; font-size: 11px; }

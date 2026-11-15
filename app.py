@@ -58,6 +58,30 @@ def database_connection():
                         ("P003", "Road accident", "Moderate", 21),
                     ),
                 )
+            demo_cases = (
+                ("P201", "Cardiac emergency", "Critical", 6),
+                ("P202", "Road accident", "High", 12),
+                ("P203", "Urgent assistance", "Critical", 3),
+            )
+            connection.executemany(
+                """
+                INSERT OR IGNORE INTO patients (id, emergency_type, severity, eta, status)
+                VALUES (?, ?, ?, ?, 'Pending')
+                """,
+                demo_cases,
+            )
+            connection.executemany(
+                """
+                INSERT OR IGNORE INTO ambulance_requests
+                    (id, ambulance_id, patient_id, emergency_type, severity, eta, is_sos)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    ("DEMO-REQ-201", "AMB-201", "P201", "Cardiac emergency", "Critical", 6, 0),
+                    ("DEMO-REQ-202", "AMB-202", "P202", "Road accident", "High", 12, 0),
+                    ("DEMO-REQ-203", "AMB-203", "P203", "Urgent assistance", "Critical", 3, 1),
+                ),
+            )
         with connection:
             yield connection
     finally:
