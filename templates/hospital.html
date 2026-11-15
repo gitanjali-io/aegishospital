@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#f3f6f4">
     <title>AegisRoute AI | Hospital Operations</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='25') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='27') }}">
 </head>
 <body>
     <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -105,43 +105,16 @@
 
         <section class="bottom-grid">
             <article class="panel" id="ambulances">
-                <div class="panel-heading"><div><p class="eyebrow">SHARED DEMO INTAKE</p><h2>Ambulance requests · hospital response</h2></div><span class="panel-count" id="request-count">0 pending</span></div>
-                <p class="form-intro">Driver: submit an incoming patient below. Hospital staff: requests from every connected browser appear in this shared queue; mark each one Received or Declined.</p>
-                <form id="ambulance-form" class="form-grid">
-                    <label>Ambulance ID<input name="ambulanceId" required maxlength="20" placeholder="e.g. AMB-104"></label>
-                    <label>Patient ID<input name="patientId" required maxlength="20" placeholder="e.g. P004"></label>
-                    <label>Emergency type<input name="emergencyType" required maxlength="80" placeholder="e.g. Road accident"></label>
-                    <label>Severity
-                        <select name="severity" required>
-                            <option value="Critical">Critical</option>
-                            <option value="High">High</option>
-                            <option value="Moderate" selected>Moderate</option>
-                        </select>
-                    </label>
-                    <label>ETA (minutes)<input name="eta" type="number" min="0" max="999" required placeholder="10"></label>
-                    <div class="form-actions">
-                        <button class="primary-button" type="submit">Send request to hospital</button>
-                        <button class="sos-button" id="sos-button" type="button">SOS · urgent help</button>
-                    </div>
-                </form>
+                <div class="panel-heading"><div><p class="eyebrow">HOSPITAL RECEIVING DESK</p><h2>Incoming ambulance requests</h2></div><span class="panel-count" id="request-count">0 pending</span></div>
+                <p class="form-intro">Requests sent by ambulance drivers appear here automatically. Review each request and accept it as Received or Decline it.</p>
                 <div class="request-list" id="request-list" aria-live="polite"></div>
-                <p class="demo-note">Demo only: requests and SOS alerts are shared with this app's hospital queue. This is not a real hospital connection and does not contact emergency services. Do not enter real patient information. For real emergencies, call your local emergency number.</p>
+                <p class="demo-note">Demo queue only. This dashboard is not connected to a real hospital dispatch network. Do not enter real patient information.</p>
             </article>
             <article class="panel alert-panel" id="alerts">
-                <div class="panel-heading"><div><p class="eyebrow">ATTENTION</p><h2>Emergency alert</h2></div><span class="severity critical">CRITICAL</span></div>
-                <div class="alert-content">
-                    <span class="alert-icon" aria-hidden="true">!</span>
-                    <div class="alert-copy">
-                        <span class="alert-sample-tag">DEMO SCENARIO · P001</span>
-                        <strong>Critical case arriving</strong>
-                        <p>Cardiac emergency · illustrative patient record.</p>
-                        <div class="alert-facts">
-                            <span>ESTIMATED ARRIVAL<strong>08 min</strong></span>
-                            <span>RESOURCE REQUIRED<strong>ICU</strong></span>
-                        </div>
-                    </div>
-                </div>
-                <p class="demo-note">This sample alert is not connected to emergency dispatch.</p>
+                <div class="panel-heading"><div><p class="eyebrow">RECEIVED SOS ALERTS</p><h2>Urgent driver alerts</h2></div><span class="panel-count sos-count" id="sos-count">0 active</span></div>
+                <p class="form-intro">SOS alerts sent by ambulance drivers are highlighted here. Hospital staff can mark the alert Received or Declined.</p>
+                <div class="request-list" id="sos-list" aria-live="assertive"></div>
+                <p class="demo-note">SOS is received only when an ambulance system submits it to the request API. This demo does not contact emergency services.</p>
             </article>
         </section>
 
@@ -151,6 +124,6 @@
         </footer>
         <p id="dashboard-message" class="visually-hidden" role="status" aria-live="polite"></p>
     </main>
-    <script src="{{ url_for('static', filename='js/script.js', v='8') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/script.js', v='10') }}" defer></script>
 </body>
 </html>

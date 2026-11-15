@@ -7,8 +7,8 @@ document.querySelectorAll(".sidebar nav a").forEach((link) => {
 
 const patientsBody = document.querySelector("#patients-body");
 const requestList = document.querySelector("#request-list");
+const sosList = document.querySelector("#sos-list");
 const patientForm = document.querySelector("#patient-form");
-const ambulanceForm = document.querySelector("#ambulance-form");
 const dashboardMessage = document.querySelector("#dashboard-message");
 let patients = [];
 let requests = [];
@@ -70,12 +70,17 @@ function renderPatients() {
         `${patients.length} ${patients.length === 1 ? "record" : "records"}`;
 }
 
-function renderRequests() {
-    requestList.replaceChildren();
-    const pendingCount = requests.filter((item) => item.status === "Pending").length;
-    document.querySelector("#request-count").textContent = `${pendingCount} pending`;
+function renderRequestCards(container, items, emptyMessage) {
+    container.replaceChildren();
+    if (items.length === 0) {
+        const emptyState = document.createElement("p");
+        emptyState.className = "queue-empty";
+        emptyState.textContent = emptyMessage;
+        container.append(emptyState);
+        return;
+    }
 
-    requests.forEach((item) => {
+    items.forEach((item) => {
         const card = document.createElement("article");
         card.className = `request-card${item.sos ? " request-sos" : ""}`;
 
@@ -88,7 +93,7 @@ function renderRequests() {
             `${item.emergencyType} · ${item.severity} · ETA ${item.eta} min`;
         const state = document.createElement("span");
         state.className = "request-state";
-        state.textContent = `${item.sos ? "SOS · " : ""}${item.status}`;
+        state.textContent = `${item.sos ? "SOS · " : ""}${item.status === "Pending" ? "Awaiting hospital response" : item.status}`;
         details.append(title, description, state);
         card.append(details);
 
@@ -96,8 +101,8 @@ function renderRequests() {
             const actions = document.createElement("div");
             actions.className = "request-actions";
             [
-                { status: "Received", className: "primary-button", label: "Mark received" },
-                { status: "Declined", className: "secondary-button", label: "Decline" },
+                { status: "Received", className: "primary-button", label: "Accept · mark received" },
+                { status: "Declined", className: "secondary-button", label: "Decline request" },
             ].forEach((action) => {
                 const button = document.createElement("button");
                 button.type = "button";
@@ -109,8 +114,25 @@ function renderRequests() {
             });
             card.append(actions);
         }
-        requestList.append(card);
+        container.append(card);
     });
+}
+
+function renderRequests() {
+    const pendingRequests = requests.filter((item) => item.status === "Pending" && !item.sos);
+    const pendingSos = requests.filter((item) => item.status === "Pending" && item.sos);
+    document.querySelector("#request-count").textContent = `${pendingRequests.length} pending`;
+    document.querySelector("#sos-count").textContent = `${pendingSos.length} active`;
+    renderRequestCards(
+        requestList,
+        requests.filter((item) => !item.sos),
+        "No ambulance requests received yet.",
+    );
+    renderRequestCards(
+        sosList,
+        requests.filter((item) => item.sos),
+        "No SOS alerts received.",
+    );
 }
 
 async function refreshData() {
@@ -136,52 +158,20 @@ function readForm(form) {
     return Object.fromEntries(new FormData(form).entries());
 }
 
-function getPatientPayload(form) {
-    const values = readForm(form);
-    return {
-        patientId: values.patientId.trim().toUpperCase(),
-        emergencyType: values.emergencyType.trim(),
-        severity: values.severity,
-        eta: Number(values.eta),
-    };
-}
-
-async function sendAmbulanceRequest(isSos = false) {
-    if (!ambulanceForm.reportValidity()) return;
-    const values = readForm(ambulanceForm);
-    const button = document.querySelector(isSos ? "#sos-button" : "#ambulance-form button[type=submit]");
-    button.disabled = true;
-    try {
-        await apiRequest("/api/v1/ambulance-requests", {
-            method: "POST",
-            body: JSON.stringify({
-                ambulanceId: values.ambulanceId.trim().toUpperCase(),
-                ...getPatientPayload(ambulanceForm),
-                sos: isSos,
-            }),
-        });
-        ambulanceForm.reset();
-        await refreshData();
-        showMessage(
-            isSos
-                ? "Demo SOS received in the shared hospital queue. It did not contact emergency services."
-                : "Ambulance request sent to the shared hospital queue.",
-        );
-    } catch (error) {
-        showMessage(`Could not send request: ${error.message}`);
-    } finally {
-        button.disabled = false;
-    }
-}
-
 patientForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     const button = patientForm.querySelector("button[type=submit]");
     button.disabled = true;
     try {
+        const values = readForm(patientForm);
         await apiRequest("/api/v1/patients", {
             method: "POST",
-            body: JSON.stringify(getPatientPayload(patientForm)),
+            body: JSON.stringify({
+                patientId: values.patientId.trim().toUpperCase(),
+                emergencyType: values.emergencyType.trim(),
+                severity: values.severity,
+                eta: Number(values.eta),
+            }),
         });
         patientForm.reset();
         await refreshData();
@@ -193,19 +183,7 @@ patientForm.addEventListener("submit", async (event) => {
     }
 });
 
-ambulanceForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    sendAmbulanceRequest();
-});
-
-document.querySelector("#sos-button").addEventListener("click", () => {
-    if (!ambulanceForm.reportValidity()) return;
-    if (window.confirm("Send a demo SOS request to the shared hospital queue? This will not contact emergency services.")) {
-        sendAmbulanceRequest(true);
-    }
-});
-
-requestList.addEventListener("click", async (event) => {
+async function handleQueueAction(event) {
     const button = event.target.closest("button[data-request-id]");
     if (!button) return;
     button.disabled = true;
@@ -223,7 +201,10 @@ requestList.addEventListener("click", async (event) => {
         showMessage(`Could not update request: ${error.message}`);
         await refreshData();
     }
-});
+}
+
+requestList.addEventListener("click", handleQueueAction);
+sosList.addEventListener("click", handleQueueAction);
 
 refreshData();
 window.setInterval(refreshData, 4000);

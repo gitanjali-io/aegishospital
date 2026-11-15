@@ -36,23 +36,30 @@ class DashboardApiTests(unittest.TestCase):
         self.assertNotIn("pm2.5", page)
         self.assertIn("operations snapshot", page)
 
-    def test_dashboard_includes_patient_intake_and_ambulance_acknowledgment(self):
+    def test_dashboard_is_hospital_receiver_not_ambulance_request_sender(self):
         response = app.app.test_client().get("/")
 
         self.assertEqual(response.status_code, 200)
         page = response.get_data(as_text=True)
         self.assertIn('id="patient-form"', page)
-        self.assertIn('id="ambulance-form"', page)
-        self.assertIn('id="sos-button"', page)
+        self.assertIn('id="request-list"', page)
+        self.assertIn('id="sos-list"', page)
+        self.assertIn("Incoming ambulance requests", page)
+        self.assertIn("Urgent driver alerts", page)
+        self.assertNotIn('id="ambulance-form"', page)
+        self.assertNotIn('id="sos-button"', page)
+        self.assertNotIn("Send request to hospital", page)
         self.assertIn("does not contact emergency services", page)
 
         script_response = app.app.test_client().get("/static/js/script.js")
         script = script_response.get_data(as_text=True)
         script_response.close()
-        self.assertIn("Mark received", script)
+        self.assertIn("Accept · mark received", script)
         self.assertIn("Declined", script)
         self.assertIn("/api/v1/ambulance-requests", script)
         self.assertIn("window.setInterval(refreshData, 4000)", script)
+        self.assertNotIn("sendAmbulanceRequest", script)
+        self.assertNotIn("#sos-button", script)
 
     def test_driver_request_is_shared_and_hospital_can_mark_received(self):
         driver = app.app.test_client()
