@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#f3f6f4">
     <title>AegisRoute AI | Hospital Operations</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='24') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='25') }}">
 </head>
 <body>
     <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -65,7 +65,7 @@
         <section class="content-grid">
             <article class="panel patients-panel" id="patients">
                 <div class="panel-heading">
-                    <div><p class="eyebrow">TRIAGE OVERVIEW</p><h2>Incoming patients</h2></div>
+                    <div><p class="eyebrow">HOSPITAL PATIENT REGISTER · DEMO</p><h2>Incoming patients</h2></div>
                     <span class="panel-count" id="patient-count">03 records</span>
                 </div>
                 <details class="inline-form">
@@ -90,7 +90,7 @@
                         <tbody id="patients-body"></tbody>
                     </table>
                 </div>
-                <p class="demo-note">Demo only: records stay in this browser session and are cleared on refresh. Do not enter real patient information.</p>
+                <p class="demo-note">Demo records are shared through this app and stored in its configured database. Do not enter real patient information.</p>
             </article>
 
             <article class="panel resources-panel" id="resources">
@@ -105,8 +105,8 @@
 
         <section class="bottom-grid">
             <article class="panel" id="ambulances">
-                <div class="panel-heading"><div><p class="eyebrow">DRIVER INTAKE</p><h2>Ambulance request</h2></div><span class="panel-count" id="request-count">0 pending</span></div>
-                <p class="form-intro">Submit an incoming patient for hospital review. A request stays pending until staff acknowledge or decline it.</p>
+                <div class="panel-heading"><div><p class="eyebrow">SHARED DEMO INTAKE</p><h2>Ambulance requests · hospital response</h2></div><span class="panel-count" id="request-count">0 pending</span></div>
+                <p class="form-intro">Driver: submit an incoming patient below. Hospital staff: requests from every connected browser appear in this shared queue; mark each one Received or Declined.</p>
                 <form id="ambulance-form" class="form-grid">
                     <label>Ambulance ID<input name="ambulanceId" required maxlength="20" placeholder="e.g. AMB-104"></label>
                     <label>Patient ID<input name="patientId" required maxlength="20" placeholder="e.g. P004"></label>
@@ -120,12 +120,12 @@
                     </label>
                     <label>ETA (minutes)<input name="eta" type="number" min="0" max="999" required placeholder="10"></label>
                     <div class="form-actions">
-                        <button class="primary-button" type="submit">Send request</button>
+                        <button class="primary-button" type="submit">Send request to hospital</button>
                         <button class="sos-button" id="sos-button" type="button">SOS · urgent help</button>
                     </div>
                 </form>
                 <div class="request-list" id="request-list" aria-live="polite"></div>
-                <p class="demo-note">Demo only: requests and SOS alerts are visible in this browser session; they do not contact a hospital or emergency services. For real emergencies, call your local emergency number.</p>
+                <p class="demo-note">Demo only: requests and SOS alerts are shared with this app's hospital queue. This is not a real hospital connection and does not contact emergency services. Do not enter real patient information. For real emergencies, call your local emergency number.</p>
             </article>
             <article class="panel alert-panel" id="alerts">
                 <div class="panel-heading"><div><p class="eyebrow">ATTENTION</p><h2>Emergency alert</h2></div><span class="severity critical">CRITICAL</span></div>
@@ -151,6 +151,6 @@
         </footer>
         <p id="dashboard-message" class="visually-hidden" role="status" aria-live="polite"></p>
     </main>
-    <script src="{{ url_for('static', filename='js/script.js', v='7') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/script.js', v='8') }}" defer></script>
 </body>
 </html>

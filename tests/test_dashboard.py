@@ -1,9 +1,18 @@
+import os
+import tempfile
 import unittest
 
 import app
 
 
 class DashboardApiTests(unittest.TestCase):
+    def setUp(self):
+        self.database_directory = tempfile.TemporaryDirectory()
+        app.app.config["DATABASE"] = os.path.join(self.database_directory.name, "test.sqlite3")
+
+    def tearDown(self):
+        self.database_directory.cleanup()
+
     def test_api_identifies_demo_data_without_external_data_sources(self):
         response = app.app.test_client().get("/api/v1/dashboard")
 
@@ -35,14 +44,97 @@ class DashboardApiTests(unittest.TestCase):
         self.assertIn('id="patient-form"', page)
         self.assertIn('id="ambulance-form"', page)
         self.assertIn('id="sos-button"', page)
-        self.assertIn("do not contact a hospital or emergency services", page)
+        self.assertIn("does not contact emergency services", page)
 
         script_response = app.app.test_client().get("/static/js/script.js")
         script = script_response.get_data(as_text=True)
         script_response.close()
-        self.assertIn('"Acknowledge"', script)
-        self.assertIn('"Decline"', script)
-        self.assertIn("Pending acknowledgment", script)
+        self.assertIn("Mark received", script)
+        self.assertIn("Declined", script)
+        self.assertIn("/api/v1/ambulance-requests", script)
+        self.assertIn("window.setInterval(refreshData, 4000)", script)
+
+    def test_driver_request_is_shared_and_hospital_can_mark_received(self):
+        driver = app.app.test_client()
+        hospital = app.app.test_client()
+        response = driver.post(
+            "/api/v1/ambulance-requests",
+            json={
+                "ambulanceId": "AMB-104",
+                "patientId": "P004",
+                "emergencyType": "Road accident",
+                "severity": "High",
+                "eta": 12,
+            },
+        )
+
+        self.assertEqual(response.status_code, 201)
+        created = response.get_json()["request"]
+        self.assertEqual(created["status"], "Pending")
+        self.assertFalse(created["sos"])
+
+        received = hospital.get("/api/v1/ambulance-requests").get_json()["requests"]
+        self.assertEqual(received[0]["id"], created["id"])
+        self.assertEqual(received[0]["patientId"], "P004")
+
+        response = hospital.patch(
+            f"/api/v1/ambulance-requests/{created['id']}",
+            json={"status": "Received"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json()["request"]["status"], "Received")
+        self.assertEqual(
+            hospital.get("/api/v1/patients").get_json()["patients"][0]["status"],
+            "Received",
+        )
+
+    def test_hospital_can_decline_request_and_sos_is_flagged_critical(self):
+        client = app.app.test_client()
+        response = client.post(
+            "/api/v1/ambulance-requests",
+            json={
+                "ambulanceId": "AMB-105",
+                "patientId": "P005",
+                "emergencyType": "Urgent assistance",
+                "severity": "Moderate",
+                "eta": 3,
+                "sos": True,
+            },
+        )
+        created = response.get_json()["request"]
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(created["sos"])
+        self.assertEqual(created["severity"], "Critical")
+
+        response = client.patch(
+            f"/api/v1/ambulance-requests/{created['id']}",
+            json={"status": "Declined"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json()["request"]["status"], "Declined")
+
+    def test_request_validation_and_duplicate_patient_ids(self):
+        client = app.app.test_client()
+        invalid = client.post(
+            "/api/v1/ambulance-requests",
+            json={
+                "ambulanceId": "AMB-106",
+                "patientId": "P006",
+                "emergencyType": "Emergency",
+                "severity": "Unknown",
+                "eta": True,
+            },
+        )
+        self.assertEqual(invalid.status_code, 400)
+
+        patient = {
+            "patientId": "P010",
+            "emergencyType": "Triage",
+            "severity": "Moderate",
+            "eta": 15,
+        }
+        self.assertEqual(client.post("/api/v1/patients", json=patient).status_code, 201)
+        self.assertEqual(client.post("/api/v1/patients", json=patient).status_code, 409)
 
     def test_dashboard_static_assets_are_served(self):
         client = app.app.test_client()

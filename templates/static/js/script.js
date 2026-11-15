@@ -5,20 +5,32 @@ document.querySelectorAll(".sidebar nav a").forEach((link) => {
     });
 });
 
-const patients = [
-    { id: "P001", emergencyType: "Cardiac emergency", severity: "Critical", eta: 8, status: "Incoming" },
-    { id: "P002", emergencyType: "Spinal trauma", severity: "High", eta: 14, status: "Incoming" },
-    { id: "P003", emergencyType: "Road accident", severity: "Moderate", eta: 21, status: "Incoming" },
-];
-const requests = [];
-const patientForm = document.querySelector("#patient-form");
-const ambulanceForm = document.querySelector("#ambulance-form");
 const patientsBody = document.querySelector("#patients-body");
 const requestList = document.querySelector("#request-list");
+const patientForm = document.querySelector("#patient-form");
+const ambulanceForm = document.querySelector("#ambulance-form");
 const dashboardMessage = document.querySelector("#dashboard-message");
+let patients = [];
+let requests = [];
+let refreshInProgress = false;
 
 function showMessage(message) {
     dashboardMessage.textContent = message;
+}
+
+async function apiRequest(url, options = {}) {
+    const response = await fetch(url, {
+        ...options,
+        headers: {
+            ...(options.body ? { "Content-Type": "application/json" } : {}),
+            ...options.headers,
+        },
+    });
+    const payload = await response.json();
+    if (!response.ok) {
+        throw new Error(payload.error || `Request failed (${response.status}).`);
+    }
+    return payload;
 }
 
 function createCell(text, className) {
@@ -60,36 +72,39 @@ function renderPatients() {
 
 function renderRequests() {
     requestList.replaceChildren();
-    const pendingCount = requests.filter((request) => request.status === "Pending acknowledgment").length;
+    const pendingCount = requests.filter((item) => item.status === "Pending").length;
     document.querySelector("#request-count").textContent = `${pendingCount} pending`;
 
-    requests.forEach((request) => {
+    requests.forEach((item) => {
         const card = document.createElement("article");
-        card.className = `request-card${request.sos ? " request-sos" : ""}`;
+        card.className = `request-card${item.sos ? " request-sos" : ""}`;
 
         const details = document.createElement("div");
         details.className = "request-details";
         const title = document.createElement("strong");
-        title.textContent = `${request.ambulanceId} · ${request.patientId}`;
+        title.textContent = `${item.ambulanceId} · ${item.patientId}`;
         const description = document.createElement("span");
         description.textContent =
-            `${request.emergencyType} · ${request.severity} · ETA ${request.eta} min`;
+            `${item.emergencyType} · ${item.severity} · ETA ${item.eta} min`;
         const state = document.createElement("span");
         state.className = "request-state";
-        state.textContent = `${request.sos ? "SOS · " : ""}${request.status}`;
+        state.textContent = `${item.sos ? "SOS · " : ""}${item.status}`;
         details.append(title, description, state);
         card.append(details);
 
-        if (request.status === "Pending acknowledgment") {
+        if (item.status === "Pending") {
             const actions = document.createElement("div");
             actions.className = "request-actions";
-            ["acknowledge", "decline"].forEach((action) => {
+            [
+                { status: "Received", className: "primary-button", label: "Mark received" },
+                { status: "Declined", className: "secondary-button", label: "Decline" },
+            ].forEach((action) => {
                 const button = document.createElement("button");
                 button.type = "button";
-                button.className = action === "acknowledge" ? "primary-button" : "secondary-button";
-                button.dataset.requestId = request.id;
-                button.dataset.action = action;
-                button.textContent = action === "acknowledge" ? "Acknowledge" : "Decline";
+                button.className = action.className;
+                button.dataset.requestId = item.id;
+                button.dataset.status = action.status;
+                button.textContent = action.label;
                 actions.append(button);
             });
             card.append(actions);
@@ -98,90 +113,117 @@ function renderRequests() {
     });
 }
 
+async function refreshData() {
+    if (refreshInProgress) return;
+    refreshInProgress = true;
+    try {
+        const [patientData, requestData] = await Promise.all([
+            apiRequest("/api/v1/patients"),
+            apiRequest("/api/v1/ambulance-requests"),
+        ]);
+        patients = patientData.patients;
+        requests = requestData.requests;
+        renderPatients();
+        renderRequests();
+    } catch (error) {
+        showMessage(`Could not load the shared hospital queue: ${error.message}`);
+    } finally {
+        refreshInProgress = false;
+    }
+}
+
 function readForm(form) {
     return Object.fromEntries(new FormData(form).entries());
 }
 
-function addRequest(form, isSos = false) {
-    if (!form.reportValidity()) return;
+function getPatientPayload(form) {
     const values = readForm(form);
-    const patientId = values.patientId.trim().toUpperCase();
-    const ambulanceId = values.ambulanceId.trim().toUpperCase();
-    const existingPatient = patients.find((patient) => patient.id === patientId);
-    const patientDetails = {
-        id: patientId,
-        emergencyType: values.emergencyType.trim(),
-        severity: isSos ? "Critical" : values.severity,
-        eta: Number(values.eta),
-        status: "Pending acknowledgment",
-    };
-
-    if (existingPatient) Object.assign(existingPatient, patientDetails);
-    else patients.unshift(patientDetails);
-
-    requests.unshift({
-        id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${requests.length}`,
-        ambulanceId,
-        patientId,
-        emergencyType: patientDetails.emergencyType,
-        severity: patientDetails.severity,
-        eta: patientDetails.eta,
-        status: "Pending acknowledgment",
-        sos: isSos,
-    });
-    renderPatients();
-    renderRequests();
-    showMessage(isSos ? "SOS request added to the demo acknowledgment queue." : "Ambulance request added to the demo acknowledgment queue.");
-    form.reset();
-}
-
-patientForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const values = readForm(patientForm);
-    const patientId = values.patientId.trim().toUpperCase();
-    if (patients.some((patient) => patient.id === patientId)) {
-        showMessage(`Patient ID ${patientId} already exists. Use a unique ID.`);
-        patientForm.elements.patientId.focus();
-        return;
-    }
-
-    patients.unshift({
-        id: patientId,
+    return {
+        patientId: values.patientId.trim().toUpperCase(),
         emergencyType: values.emergencyType.trim(),
         severity: values.severity,
         eta: Number(values.eta),
-        status: "Incoming",
-    });
-    renderPatients();
-    showMessage(`Demo patient ${patientId} added.`);
-    patientForm.reset();
+    };
+}
+
+async function sendAmbulanceRequest(isSos = false) {
+    if (!ambulanceForm.reportValidity()) return;
+    const values = readForm(ambulanceForm);
+    const button = document.querySelector(isSos ? "#sos-button" : "#ambulance-form button[type=submit]");
+    button.disabled = true;
+    try {
+        await apiRequest("/api/v1/ambulance-requests", {
+            method: "POST",
+            body: JSON.stringify({
+                ambulanceId: values.ambulanceId.trim().toUpperCase(),
+                ...getPatientPayload(ambulanceForm),
+                sos: isSos,
+            }),
+        });
+        ambulanceForm.reset();
+        await refreshData();
+        showMessage(
+            isSos
+                ? "Demo SOS received in the shared hospital queue. It did not contact emergency services."
+                : "Ambulance request sent to the shared hospital queue.",
+        );
+    } catch (error) {
+        showMessage(`Could not send request: ${error.message}`);
+    } finally {
+        button.disabled = false;
+    }
+}
+
+patientForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const button = patientForm.querySelector("button[type=submit]");
+    button.disabled = true;
+    try {
+        await apiRequest("/api/v1/patients", {
+            method: "POST",
+            body: JSON.stringify(getPatientPayload(patientForm)),
+        });
+        patientForm.reset();
+        await refreshData();
+        showMessage("Patient added to the shared demo register.");
+    } catch (error) {
+        showMessage(`Could not add patient: ${error.message}`);
+    } finally {
+        button.disabled = false;
+    }
 });
 
 ambulanceForm.addEventListener("submit", (event) => {
     event.preventDefault();
-    addRequest(ambulanceForm);
+    sendAmbulanceRequest();
 });
 
 document.querySelector("#sos-button").addEventListener("click", () => {
     if (!ambulanceForm.reportValidity()) return;
-    if (window.confirm("Send a demo SOS request to the on-screen acknowledgment queue? This will not contact emergency services.")) {
-        addRequest(ambulanceForm, true);
+    if (window.confirm("Send a demo SOS request to the shared hospital queue? This will not contact emergency services.")) {
+        sendAmbulanceRequest(true);
     }
 });
 
-requestList.addEventListener("click", (event) => {
+requestList.addEventListener("click", async (event) => {
     const button = event.target.closest("button[data-request-id]");
     if (!button) return;
-    const request = requests.find((item) => item.id === button.dataset.requestId);
-    if (!request || request.status !== "Pending acknowledgment") return;
-
-    request.status = button.dataset.action === "acknowledge" ? "Acknowledged" : "Declined";
-    const patient = patients.find((item) => item.id === request.patientId);
-    if (patient) patient.status = request.status;
-    renderPatients();
-    renderRequests();
-    showMessage(`Request from ${request.ambulanceId} ${request.status.toLowerCase()}.`);
+    button.disabled = true;
+    try {
+        const result = await apiRequest(
+            `/api/v1/ambulance-requests/${encodeURIComponent(button.dataset.requestId)}`,
+            {
+                method: "PATCH",
+                body: JSON.stringify({ status: button.dataset.status }),
+            },
+        );
+        await refreshData();
+        showMessage(`Request from ${result.request.ambulanceId} marked ${result.request.status.toLowerCase()}.`);
+    } catch (error) {
+        showMessage(`Could not update request: ${error.message}`);
+        await refreshData();
+    }
 });
 
-renderPatients();
-renderRequests();
+refreshData();
+window.setInterval(refreshData, 4000);
