@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#f3f6f4">
     <title>AegisRoute AI | Hospital Operations</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='23') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='24') }}">
 </head>
 <body>
     <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -66,19 +66,31 @@
             <article class="panel patients-panel" id="patients">
                 <div class="panel-heading">
                     <div><p class="eyebrow">TRIAGE OVERVIEW</p><h2>Incoming patients</h2></div>
-                    <span class="panel-count">03 records</span>
+                    <span class="panel-count" id="patient-count">03 records</span>
                 </div>
+                <details class="inline-form">
+                    <summary class="secondary-button">+ Add patient</summary>
+                    <form id="patient-form" class="form-grid">
+                        <label>Patient ID<input name="patientId" required maxlength="20" placeholder="e.g. P004"></label>
+                        <label>Emergency type<input name="emergencyType" required maxlength="80" placeholder="e.g. Cardiac emergency"></label>
+                        <label>Severity
+                            <select name="severity" required>
+                                <option value="Critical">Critical</option>
+                                <option value="High">High</option>
+                                <option value="Moderate" selected>Moderate</option>
+                            </select>
+                        </label>
+                        <label>ETA (minutes)<input name="eta" type="number" min="0" max="999" required placeholder="10"></label>
+                        <button class="primary-button" type="submit">Add patient record</button>
+                    </form>
+                </details>
                 <div class="table-wrap">
                     <table>
                         <thead><tr><th>Patient ID</th><th>Emergency type</th><th>Severity</th><th>ETA</th><th>Status</th></tr></thead>
-                        <tbody>
-                            <tr><td class="patient-id">P001</td><td>Cardiac emergency</td><td><span class="severity critical">Critical</span></td><td>08 min</td><td><span class="status-label"><span class="small-status-dot"></span> Incoming</span></td></tr>
-                            <tr><td class="patient-id">P002</td><td>Spinal trauma</td><td><span class="severity high">High</span></td><td>14 min</td><td><span class="status-label"><span class="small-status-dot"></span> Incoming</span></td></tr>
-                            <tr><td class="patient-id">P003</td><td>Road accident</td><td><span class="severity moderate">Moderate</span></td><td>21 min</td><td><span class="status-label"><span class="small-status-dot"></span> Incoming</span></td></tr>
-                        </tbody>
+                        <tbody id="patients-body"></tbody>
                     </table>
                 </div>
-                <p class="demo-note">Illustrative records only. No real patient information is connected.</p>
+                <p class="demo-note">Demo only: records stay in this browser session and are cleared on refresh. Do not enter real patient information.</p>
             </article>
 
             <article class="panel resources-panel" id="resources">
@@ -93,11 +105,27 @@
 
         <section class="bottom-grid">
             <article class="panel" id="ambulances">
-                <div class="panel-heading"><div><p class="eyebrow">FLEET</p><h2>Ambulance arrivals</h2></div><span class="panel-count">03 units</span></div>
-                <div class="arrival-row"><span class="arrival-icon" aria-hidden="true"><svg class="ui-icon"><use href="#icon-ambulance"/></svg></span><div><strong>AMB-101</strong><small>Cardiac emergency</small></div><span class="arrival-eta">08 min</span></div>
-                <div class="arrival-row"><span class="arrival-icon" aria-hidden="true"><svg class="ui-icon"><use href="#icon-ambulance"/></svg></span><div><strong>AMB-102</strong><small>Spinal trauma</small></div><span class="arrival-eta">14 min</span></div>
-                <div class="arrival-row"><span class="arrival-icon" aria-hidden="true"><svg class="ui-icon"><use href="#icon-ambulance"/></svg></span><div><strong>AMB-103</strong><small>Road accident</small></div><span class="arrival-eta">21 min</span></div>
-                <p class="demo-note">Example arrivals only · not connected to dispatch.</p>
+                <div class="panel-heading"><div><p class="eyebrow">DRIVER INTAKE</p><h2>Ambulance request</h2></div><span class="panel-count" id="request-count">0 pending</span></div>
+                <p class="form-intro">Submit an incoming patient for hospital review. A request stays pending until staff acknowledge or decline it.</p>
+                <form id="ambulance-form" class="form-grid">
+                    <label>Ambulance ID<input name="ambulanceId" required maxlength="20" placeholder="e.g. AMB-104"></label>
+                    <label>Patient ID<input name="patientId" required maxlength="20" placeholder="e.g. P004"></label>
+                    <label>Emergency type<input name="emergencyType" required maxlength="80" placeholder="e.g. Road accident"></label>
+                    <label>Severity
+                        <select name="severity" required>
+                            <option value="Critical">Critical</option>
+                            <option value="High">High</option>
+                            <option value="Moderate" selected>Moderate</option>
+                        </select>
+                    </label>
+                    <label>ETA (minutes)<input name="eta" type="number" min="0" max="999" required placeholder="10"></label>
+                    <div class="form-actions">
+                        <button class="primary-button" type="submit">Send request</button>
+                        <button class="sos-button" id="sos-button" type="button">SOS · urgent help</button>
+                    </div>
+                </form>
+                <div class="request-list" id="request-list" aria-live="polite"></div>
+                <p class="demo-note">Demo only: requests and SOS alerts are visible in this browser session; they do not contact a hospital or emergency services. For real emergencies, call your local emergency number.</p>
             </article>
             <article class="panel alert-panel" id="alerts">
                 <div class="panel-heading"><div><p class="eyebrow">ATTENTION</p><h2>Emergency alert</h2></div><span class="severity critical">CRITICAL</span></div>
@@ -121,7 +149,8 @@
             <span>AegisRoute AI <span class="footer-separator">·</span> Hospital operations dashboard</span>
             <span>Integration-ready <span class="footer-separator">·</span> <code>/api/v1/dashboard</code></span>
         </footer>
+        <p id="dashboard-message" class="visually-hidden" role="status" aria-live="polite"></p>
     </main>
-    <script src="{{ url_for('static', filename='js/script.js', v='6') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/script.js', v='7') }}" defer></script>
 </body>
 </html>
