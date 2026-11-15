@@ -8,11 +8,14 @@ document.querySelectorAll(".sidebar nav a").forEach((link) => {
 const patientsBody = document.querySelector("#patients-body");
 const requestList = document.querySelector("#request-list");
 const sosList = document.querySelector("#sos-list");
-const patientForm = document.querySelector("#patient-form");
+const hospitalForm = document.querySelector("#hospital-form");
+const hospitalSelect = document.querySelector("#hospital-select");
 const dashboardMessage = document.querySelector("#dashboard-message");
 let patients = [];
 let requests = [];
-let refreshInProgress = false;
+let hospitals = [];
+let selectedHospitalId = "";
+let refreshVersion = 0;
 
 function showMessage(message) {
     dashboardMessage.textContent = message;
@@ -68,6 +71,34 @@ function renderPatients() {
     });
     document.querySelector("#patient-count").textContent =
         `${patients.length} ${patients.length === 1 ? "record" : "records"}`;
+}
+
+function updateHospitalContext() {
+    const hospital = hospitals.find((item) => item.id === selectedHospitalId);
+    if (!hospital) return;
+    document.querySelector("#hospital-location").textContent =
+        `HOSPITAL OPERATIONS / ${hospital.location.toUpperCase()}`;
+    document.querySelector("#hospital-subtitle").textContent =
+        `${hospital.name} · ${hospital.location}`;
+}
+
+async function loadHospitals() {
+    const data = await apiRequest("/api/v1/hospitals");
+    hospitals = data.hospitals;
+    hospitalSelect.replaceChildren();
+    hospitals.forEach((hospital) => {
+        const option = document.createElement("option");
+        option.value = hospital.id;
+        option.textContent = `${hospital.name} · ${hospital.location}`;
+        hospitalSelect.append(option);
+    });
+
+    const savedHospitalId = localStorage.getItem("hospitalId");
+    selectedHospitalId = hospitals.some((item) => item.id === savedHospitalId)
+        ? savedHospitalId
+        : hospitals[0]?.id ?? "";
+    hospitalSelect.value = selectedHospitalId;
+    updateHospitalContext();
 }
 
 function renderRequestCards(container, items, emptyMessage) {
@@ -136,21 +167,23 @@ function renderRequests() {
 }
 
 async function refreshData() {
-    if (refreshInProgress) return;
-    refreshInProgress = true;
+    if (!selectedHospitalId) return;
+    const version = ++refreshVersion;
+    const hospitalId = selectedHospitalId;
+    const query = `?hospitalId=${encodeURIComponent(hospitalId)}`;
     try {
         const [patientData, requestData] = await Promise.all([
-            apiRequest("/api/v1/patients"),
-            apiRequest("/api/v1/ambulance-requests"),
+            apiRequest(`/api/v1/patients${query}`),
+            apiRequest(`/api/v1/ambulance-requests${query}`),
         ]);
+        if (version !== refreshVersion || hospitalId !== selectedHospitalId) return;
         patients = patientData.patients;
         requests = requestData.requests;
         renderPatients();
         renderRequests();
     } catch (error) {
+        if (version !== refreshVersion) return;
         showMessage(`Could not load the shared hospital queue: ${error.message}`);
-    } finally {
-        refreshInProgress = false;
     }
 }
 
@@ -158,29 +191,43 @@ function readForm(form) {
     return Object.fromEntries(new FormData(form).entries());
 }
 
-patientForm.addEventListener("submit", async (event) => {
+hospitalForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const button = patientForm.querySelector("button[type=submit]");
+    const button = hospitalForm.querySelector("button[type=submit]");
     button.disabled = true;
     try {
-        const values = readForm(patientForm);
-        await apiRequest("/api/v1/patients", {
+        const values = readForm(hospitalForm);
+        const result = await apiRequest("/api/v1/hospitals", {
             method: "POST",
             body: JSON.stringify({
-                patientId: values.patientId.trim().toUpperCase(),
-                emergencyType: values.emergencyType.trim(),
-                severity: values.severity,
-                eta: Number(values.eta),
+                name: values.name.trim(),
+                location: values.location.trim(),
             }),
         });
-        patientForm.reset();
+        await loadHospitals();
+        selectedHospitalId = result.hospital.id;
+        hospitalSelect.value = selectedHospitalId;
+        localStorage.setItem("hospitalId", selectedHospitalId);
+        updateHospitalContext();
+        hospitalForm.reset();
         await refreshData();
-        showMessage("Patient added to the shared demo register.");
+        showMessage(`${result.hospital.name} inbox added.`);
     } catch (error) {
-        showMessage(`Could not add patient: ${error.message}`);
+        showMessage(`Could not add hospital: ${error.message}`);
     } finally {
         button.disabled = false;
     }
+});
+
+hospitalSelect.addEventListener("change", () => {
+    selectedHospitalId = hospitalSelect.value;
+    localStorage.setItem("hospitalId", selectedHospitalId);
+    updateHospitalContext();
+    patients = [];
+    requests = [];
+    renderPatients();
+    renderRequests();
+    refreshData();
 });
 
 async function handleQueueAction(event) {
@@ -192,7 +239,10 @@ async function handleQueueAction(event) {
             `/api/v1/ambulance-requests/${encodeURIComponent(button.dataset.requestId)}`,
             {
                 method: "PATCH",
-                body: JSON.stringify({ status: button.dataset.status }),
+                body: JSON.stringify({
+                    status: button.dataset.status,
+                    hospitalId: selectedHospitalId,
+                }),
             },
         );
         await refreshData();
@@ -206,5 +256,7 @@ async function handleQueueAction(event) {
 requestList.addEventListener("click", handleQueueAction);
 sosList.addEventListener("click", handleQueueAction);
 
-refreshData();
+loadHospitals()
+    .then(refreshData)
+    .catch((error) => showMessage(`Could not load hospitals: ${error.message}`));
 window.setInterval(refreshData, 4000);

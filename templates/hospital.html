@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#f3f6f4">
     <title>AegisRoute AI | Hospital Operations</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='28') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='30') }}">
 </head>
 <body>
     <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -39,15 +39,24 @@
     <main class="main-content" id="overview">
         <header class="topbar">
             <div>
-                <p class="eyebrow">HOSPITAL OPERATIONS / BENGALURU</p>
+                <p class="eyebrow" id="hospital-location">HOSPITAL OPERATIONS / BENGALURU</p>
                 <h1>Emergency coordination</h1>
-                <p class="page-subtitle">Hospital coordination workspace · Bengaluru, India</p>
+                <p class="page-subtitle" id="hospital-subtitle">Hospital coordination workspace</p>
             </div>
-            <div class="environment-chip" role="status">
-                <span class="environment-dot" aria-hidden="true"></span>
-                <span><strong>DEMO ENVIRONMENT</strong><small>Illustrative data · not connected</small></span>
+            <div class="hospital-switcher">
+                <label for="hospital-select">Hospital inbox</label>
+                <select id="hospital-select" aria-label="Select hospital inbox"></select>
+                <details class="register-hospital">
+                    <summary class="secondary-button">+ Add hospital</summary>
+                    <form id="hospital-form" class="form-grid">
+                        <label>Hospital name<input name="name" required maxlength="100" placeholder="e.g. Aegis East"></label>
+                        <label>City / location<input name="location" required maxlength="100" placeholder="e.g. Bengaluru East"></label>
+                        <button class="primary-button" type="submit">Add hospital inbox</button>
+                    </form>
+                </details>
             </div>
         </header>
+        <p class="demo-note multi-hospital-note">Multi-hospital demo: the selected inbox shows only that hospital's requests, SOS alerts, and patient list. The selector is not a secure login.</p>
 
         <section class="section-block" aria-labelledby="snapshot-heading">
             <div class="section-heading">
@@ -65,32 +74,16 @@
         <section class="content-grid">
             <article class="panel patients-panel" id="patients">
                 <div class="panel-heading">
-                    <div><p class="eyebrow">HOSPITAL PATIENT REGISTER · DEMO</p><h2>Incoming patients</h2></div>
+                    <div><p class="eyebrow">FROM AMBULANCE INTAKE · DEMO</p><h2>Incoming patients</h2></div>
                     <span class="panel-count" id="patient-count">03 records</span>
                 </div>
-                <details class="inline-form">
-                    <summary class="secondary-button">+ Add patient</summary>
-                    <form id="patient-form" class="form-grid">
-                        <label>Patient ID<input name="patientId" required maxlength="20" placeholder="e.g. P004"></label>
-                        <label>Emergency type<input name="emergencyType" required maxlength="80" placeholder="e.g. Cardiac emergency"></label>
-                        <label>Severity
-                            <select name="severity" required>
-                                <option value="Critical">Critical</option>
-                                <option value="High">High</option>
-                                <option value="Moderate" selected>Moderate</option>
-                            </select>
-                        </label>
-                        <label>ETA (minutes)<input name="eta" type="number" min="0" max="999" required placeholder="10"></label>
-                        <button class="primary-button" type="submit">Add patient record</button>
-                    </form>
-                </details>
                 <div class="table-wrap">
                     <table>
                         <thead><tr><th>Patient ID</th><th>Emergency type</th><th>Severity</th><th>ETA</th><th>Status</th></tr></thead>
                         <tbody id="patients-body"></tbody>
                     </table>
                 </div>
-                <p class="demo-note">Demo records are shared through this app and stored in its configured database. Do not enter real patient information.</p>
+                <p class="demo-note">Patient details are added when an ambulance request is received. This demo stores only fictional sample data; do not enter real patient information.</p>
             </article>
 
             <article class="panel resources-panel" id="resources">
@@ -124,6 +117,6 @@
         </footer>
         <p id="dashboard-message" class="visually-hidden" role="status" aria-live="polite"></p>
     </main>
-    <script src="{{ url_for('static', filename='js/script.js', v='10') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/script.js', v='12') }}" defer></script>
 </body>
 </html>

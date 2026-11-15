@@ -65,6 +65,14 @@ h1 { margin: 7px 0 5px; color: var(--navy); font-size: clamp(24px, 2.4vw, 31px);
 .environment-chip strong, .environment-chip small { display: block; }
 .environment-chip strong { color: #435b60; font-size: 9px; letter-spacing: .75px; }
 .environment-chip small { margin-top: 3px; color: #65777a; font-size: 10px; }
+.hospital-switcher { display: grid; flex: 0 0 min(340px, 42%); gap: 7px; padding: 12px; border: 1px solid #dbe5e1; border-radius: 9px; background: #fff; box-shadow: var(--card-shadow); }
+.hospital-switcher > label { color: #435b60; font-size: 9px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase; }
+.hospital-switcher > select { width: 100%; min-height: 36px; padding: 7px 9px; border: 1px solid #cfdcd6; border-radius: 6px; color: #283b42; background: #fff; font: inherit; font-size: 11px; }
+.hospital-switcher > select:focus { outline: 2px solid #b9d8d1; outline-offset: 1px; }
+.register-hospital summary { display: inline-flex; cursor: pointer; list-style: none; }
+.register-hospital summary::-webkit-details-marker { display: none; }
+.register-hospital .form-grid { grid-template-columns: 1fr; }
+.multi-hospital-note { margin: -14px 0 18px; padding: 10px 12px; border: 1px solid #d8e4df; border-radius: 7px; background: #f8fbf9; }
 .panel, .metric-card { border: 1px solid #dbe4e0; border-radius: 10px; background: var(--panel); box-shadow: var(--card-shadow); }
 .section-heading { gap: 15px; margin-bottom: 14px; }
 .section-heading h2, .panel-heading h2 { margin: 5px 0 0; color: var(--navy); font-size: 18px; font-weight: 700; letter-spacing: -.35px; }
@@ -205,6 +213,7 @@ tbody tr:last-child td { border-bottom: 0; }
     .main-content { width: 100%; margin: 0; padding: 23px 16px 18px; }
     .content-grid, .bottom-grid { grid-template-columns: 1fr; }
     .topbar { align-items: flex-start; }
+    .hospital-switcher { width: 100%; flex-basis: auto; }
 }
 @media (max-width: 520px) {
     .topbar { flex-direction: column; gap: 14px; }
