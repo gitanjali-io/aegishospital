@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: hospital-dashboard
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    healthCheckPath: /api/v1/dashboard

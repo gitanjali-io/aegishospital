@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f3f6f4">
+    <title>AegisRoute AI | Hospital Operations</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='23') }}">
+</head>
+<body>
+    <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <symbol id="icon-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></symbol>
+        <symbol id="icon-patient" viewBox="0 0 24 24"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 20v-1.5a6.5 6.5 0 0 1 13 0V20M19 8v6m-3-3h6"/></symbol>
+        <symbol id="icon-bed" viewBox="0 0 24 24"><path d="M3 19V6m0 9h18v4M3 10h7a3 3 0 0 1 3 3v2m0-4h5a3 3 0 0 1 3 3v1"/></symbol>
+        <symbol id="icon-ambulance" viewBox="0 0 24 24"><path d="M3 7h11v11H3zM14 11h4l3 3v4h-7zM7 18a2 2 0 1 0 4 0m5 0a2 2 0 1 0 4 0M6 11h5m-2.5-2.5v5"/></symbol>
+        <symbol id="icon-bell" viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9m-8 12h4"/></symbol>
+        <symbol id="icon-ventilator" viewBox="0 0 24 24"><path d="M9 3h6v4h4v6h-4v4H9v-4H5V7h4zM12 17v4m-4 0h8"/></symbol>
+        <symbol id="icon-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    </svg>
+    <aside class="sidebar">
+        <a class="brand" href="#" aria-label="AegisRoute AI home">
+            <span class="brand-mark" aria-hidden="true">A</span>
+            <span>AegisRoute <strong>AI</strong></span>
+        </a>
+        <p class="sidebar-label">HOSPITAL OPERATIONS</p>
+        <nav aria-label="Main navigation">
+            <a class="nav-link active" href="#overview"><svg class="ui-icon" aria-hidden="true"><use href="#icon-grid"/></svg> Overview</a>
+            <a class="nav-link" href="#patients"><svg class="ui-icon" aria-hidden="true"><use href="#icon-patient"/></svg> Incoming patients</a>
+            <a class="nav-link" href="#resources"><svg class="ui-icon" aria-hidden="true"><use href="#icon-bed"/></svg> Resources</a>
+            <a class="nav-link" href="#ambulances"><svg class="ui-icon" aria-hidden="true"><use href="#icon-ambulance"/></svg> Ambulances</a>
+            <a class="nav-link" href="#alerts"><svg class="ui-icon" aria-hidden="true"><use href="#icon-bell"/></svg> Alerts</a>
+        </nav>
+        <div class="sidebar-bottom">
+            <span class="sidebar-status-dot" aria-hidden="true"></span>
+            <div><strong>Demo environment</strong><small>Operational data not connected</small></div>
+        </div>
+    </aside>
+
+    <main class="main-content" id="overview">
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">HOSPITAL OPERATIONS / BENGALURU</p>
+                <h1>Emergency coordination</h1>
+                <p class="page-subtitle">Hospital coordination workspace · Bengaluru, India</p>
+            </div>
+            <div class="environment-chip" role="status">
+                <span class="environment-dot" aria-hidden="true"></span>
+                <span><strong>DEMO ENVIRONMENT</strong><small>Illustrative data · not connected</small></span>
+            </div>
+        </header>
+
+        <section class="section-block" aria-labelledby="snapshot-heading">
+            <div class="section-heading">
+                <div><p class="eyebrow">AT A GLANCE</p><h2 id="snapshot-heading">Operations snapshot</h2><p class="section-caption">A coordinated view of arrivals, capacity, and essential equipment.</p></div>
+                <span class="snapshot-tag"><span class="snapshot-tag-dot" aria-hidden="true"></span>Illustrative preview</span>
+            </div>
+            <div class="metrics-grid">
+                <article class="metric-card"><div class="metric-top"><span class="metric-icon blue-icon" aria-hidden="true"><svg class="ui-icon"><use href="#icon-ambulance"/></svg></span><span class="metric-category">FLEET</span></div><p>Incoming ambulances</p><strong>03</strong><span class="metric-footnote">Example count · not live</span></article>
+                <article class="metric-card"><div class="metric-top"><span class="metric-icon green-icon" aria-hidden="true"><svg class="ui-icon"><use href="#icon-bed"/></svg></span><span class="metric-category">CAPACITY</span></div><p>Available ICU beds</p><strong>08</strong><span class="metric-footnote">Example count · not live</span></article>
+                <article class="metric-card"><div class="metric-top"><span class="metric-icon violet-icon" aria-hidden="true"><svg class="ui-icon"><use href="#icon-ventilator"/></svg></span><span class="metric-category">EQUIPMENT</span></div><p>Available ventilators</p><strong>05</strong><span class="metric-footnote">Example count · not live</span></article>
+                <article class="metric-card"><div class="metric-top"><span class="metric-icon amber-icon" aria-hidden="true"><svg class="ui-icon"><use href="#icon-check"/></svg></span><span class="metric-category">READINESS</span></div><p>Readiness score</p><strong>92<span class="metric-unit">%</span></strong><span class="metric-footnote">Example score · not live</span></article>
+            </div>
+        </section>
+
+        <section class="content-grid">
+            <article class="panel patients-panel" id="patients">
+                <div class="panel-heading">
+                    <div><p class="eyebrow">TRIAGE OVERVIEW</p><h2>Incoming patients</h2></div>
+                    <span class="panel-count">03 records</span>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Patient ID</th><th>Emergency type</th><th>Severity</th><th>ETA</th><th>Status</th></tr></thead>
+                        <tbody>
+                            <tr><td class="patient-id">P001</td><td>Cardiac emergency</td><td><span class="severity critical">Critical</span></td><td>08 min</td><td><span class="status-label"><span class="small-status-dot"></span> Incoming</span></td></tr>
+                            <tr><td class="patient-id">P002</td><td>Spinal trauma</td><td><span class="severity high">High</span></td><td>14 min</td><td><span class="status-label"><span class="small-status-dot"></span> Incoming</span></td></tr>
+                            <tr><td class="patient-id">P003</td><td>Road accident</td><td><span class="severity moderate">Moderate</span></td><td>21 min</td><td><span class="status-label"><span class="small-status-dot"></span> Incoming</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="demo-note">Illustrative records only. No real patient information is connected.</p>
+            </article>
+
+            <article class="panel resources-panel" id="resources">
+                <div class="panel-heading"><div><p class="eyebrow">CAPACITY</p><h2>Resource availability</h2></div><span class="panel-count">04 items</span></div>
+                <div class="resource-row"><span class="resource-icon" aria-hidden="true"><svg class="ui-icon"><use href="#icon-bed"/></svg></span><span class="resource-name">ICU beds</span><strong>08 <small>available</small></strong></div>
+                <div class="resource-row"><span class="resource-icon" aria-hidden="true"><svg class="ui-icon"><use href="#icon-bed"/></svg></span><span class="resource-name">General beds</span><strong>24 <small>available</small></strong></div>
+                <div class="resource-row"><span class="resource-icon" aria-hidden="true"><svg class="ui-icon"><use href="#icon-ventilator"/></svg></span><span class="resource-name">Ventilators</span><strong>05 <small>available</small></strong></div>
+                <div class="resource-row"><span class="resource-icon" aria-hidden="true"><svg class="ui-icon"><use href="#icon-check"/></svg></span><span class="resource-name">Trauma team</span><strong class="ready-label">Ready</strong></div>
+                <p class="demo-note">Connect an authorized hospital system for live capacity.</p>
+            </article>
+        </section>
+
+        <section class="bottom-grid">
+            <article class="panel" id="ambulances">
+                <div class="panel-heading"><div><p class="eyebrow">FLEET</p><h2>Ambulance arrivals</h2></div><span class="panel-count">03 units</span></div>
+                <div class="arrival-row"><span class="arrival-icon" aria-hidden="true"><svg class="ui-icon"><use href="#icon-ambulance"/></svg></span><div><strong>AMB-101</strong><small>Cardiac emergency</small></div><span class="arrival-eta">08 min</span></div>
+                <div class="arrival-row"><span class="arrival-icon" aria-hidden="true"><svg class="ui-icon"><use href="#icon-ambulance"/></svg></span><div><strong>AMB-102</strong><small>Spinal trauma</small></div><span class="arrival-eta">14 min</span></div>
+                <div class="arrival-row"><span class="arrival-icon" aria-hidden="true"><svg class="ui-icon"><use href="#icon-ambulance"/></svg></span><div><strong>AMB-103</strong><small>Road accident</small></div><span class="arrival-eta">21 min</span></div>
+                <p class="demo-note">Example arrivals only · not connected to dispatch.</p>
+            </article>
+            <article class="panel alert-panel" id="alerts">
+                <div class="panel-heading"><div><p class="eyebrow">ATTENTION</p><h2>Emergency alert</h2></div><span class="severity critical">CRITICAL</span></div>
+                <div class="alert-content">
+                    <span class="alert-icon" aria-hidden="true">!</span>
+                    <div class="alert-copy">
+                        <span class="alert-sample-tag">DEMO SCENARIO · P001</span>
+                        <strong>Critical case arriving</strong>
+                        <p>Cardiac emergency · illustrative patient record.</p>
+                        <div class="alert-facts">
+                            <span>ESTIMATED ARRIVAL<strong>08 min</strong></span>
+                            <span>RESOURCE REQUIRED<strong>ICU</strong></span>
+                        </div>
+                    </div>
+                </div>
+                <p class="demo-note">This sample alert is not connected to emergency dispatch.</p>
+            </article>
+        </section>
+
+        <footer class="footer">
+            <span>AegisRoute AI <span class="footer-separator">·</span> Hospital operations dashboard</span>
+            <span>Integration-ready <span class="footer-separator">·</span> <code>/api/v1/dashboard</code></span>
+        </footer>
+    </main>
+    <script src="{{ url_for('static', filename='js/script.js', v='6') }}" defer></script>
+</body>
+</html>
