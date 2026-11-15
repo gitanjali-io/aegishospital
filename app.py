@@ -18,7 +18,11 @@ DEMO_HOSPITALS = (
     (DEFAULT_HOSPITAL_ID, "Aegis Bengaluru Central", "Bengaluru, India"),
     ("bengaluru-north", "Aegis Bengaluru North", "Bengaluru, India"),
     ("bengaluru-south", "Aegis Bengaluru South", "Bengaluru, India"),
+    ("bengaluru-east", "Aegis Bengaluru East", "Bengaluru, India"),
+    ("bengaluru-west", "Aegis Bengaluru West", "Bengaluru, India"),
     ("mysuru-general", "Mysuru General Hospital", "Mysuru, India"),
+    ("hubballi-general", "Hubballi General Hospital", "Hubballi, India"),
+    ("tumakuru-district", "Tumakuru District Hospital", "Tumakuru, India"),
 )
 
 
@@ -121,6 +125,10 @@ def database_connection():
                 ("DEMO-REQ-202", DEFAULT_HOSPITAL_ID, "AMB-202", "P202", "Road accident", "High", 12, 0),
                 ("DEMO-REQ-203", "bengaluru-south", "AMB-203", "P203", "Urgent assistance", "Critical", 3, 1),
                 ("DEMO-REQ-204", "mysuru-general", "AMB-204", "P204", "Spinal trauma", "High", 18, 0),
+                ("DEMO-REQ-205", "bengaluru-east", "AMB-205", "P205", "Road accident", "Moderate", 10, 0),
+                ("DEMO-REQ-206", "bengaluru-west", "AMB-206", "P206", "Cardiac emergency", "Critical", 7, 1),
+                ("DEMO-REQ-207", "hubballi-general", "AMB-207", "P207", "Respiratory distress", "High", 15, 0),
+                ("DEMO-REQ-208", "tumakuru-district", "AMB-208", "P208", "Road accident", "High", 20, 0),
             )
             for case in demo_cases:
                 request_id, hospital_id, _, patient_id, emergency, severity, eta, _ = case

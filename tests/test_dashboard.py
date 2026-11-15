@@ -68,7 +68,7 @@ class DashboardApiTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         hospitals = response.get_json()["hospitals"]
-        self.assertGreaterEqual(len(hospitals), 4)
+        self.assertGreaterEqual(len(hospitals), 8)
         self.assertIn("bengaluru-north", {hospital["id"] for hospital in hospitals})
 
         created = app.app.test_client().post(
@@ -125,7 +125,17 @@ class DashboardApiTests(unittest.TestCase):
     def test_hospital_queue_has_fictional_pending_requests_and_sos_example(self):
         client = app.app.test_client()
         demo_requests = {}
-        for hospital_id in ("bengaluru-central", "bengaluru-north", "bengaluru-south", "mysuru-general"):
+        hospital_ids = (
+            "bengaluru-central",
+            "bengaluru-north",
+            "bengaluru-south",
+            "mysuru-general",
+            "bengaluru-east",
+            "bengaluru-west",
+            "hubballi-general",
+            "tumakuru-district",
+        )
+        for hospital_id in hospital_ids:
             requests = client.get(
                 f"/api/v1/ambulance-requests?hospitalId={hospital_id}"
             ).get_json()["requests"]
@@ -135,7 +145,15 @@ class DashboardApiTests(unittest.TestCase):
         self.assertEqual(demo_requests["DEMO-REQ-202"]["hospitalId"], "bengaluru-central")
         self.assertEqual(demo_requests["DEMO-REQ-203"]["hospitalId"], "bengaluru-south")
         self.assertEqual(demo_requests["DEMO-REQ-204"]["hospitalId"], "mysuru-general")
+        for request_id, hospital_id in (
+            ("DEMO-REQ-205", "bengaluru-east"),
+            ("DEMO-REQ-206", "bengaluru-west"),
+            ("DEMO-REQ-207", "hubballi-general"),
+            ("DEMO-REQ-208", "tumakuru-district"),
+        ):
+            self.assertEqual(demo_requests[request_id]["hospitalId"], hospital_id)
         self.assertTrue(demo_requests["DEMO-REQ-203"]["sos"])
+        self.assertTrue(demo_requests["DEMO-REQ-206"]["sos"])
 
     def test_driver_request_is_shared_and_hospital_can_mark_received(self):
         driver = app.app.test_client()
